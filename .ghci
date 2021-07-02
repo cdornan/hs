@@ -1,0 +1,5 @@
+:set -Wall
+:set -isrc
+:set -iapp
+
+:seti -XOverloadedStrings
