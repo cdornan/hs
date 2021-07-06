@@ -11,15 +11,18 @@ module HS.Managers.Stack
   ) where
 
 import           Control.Exception
+import           Data.Char
 import           Data.Map(Map)
 import qualified Data.Map               as Map
 import           Data.Maybe
+import           Data.Text(Text)
 import qualified Data.Text              as T
 import           Fmt
 import           HS.Cfg.Types
 import           HS.Managers.Types
 import           HS.Types.CompilerTool
 import           System.Directory
+import           System.FilePath
 import           System.Info(os,arch)
 import           System.Process.Typed
 import           Text.Enum.Text
@@ -49,14 +52,18 @@ stackDiscover cfg = handle hdl $ mk =<< listDirectory =<< stackStashDir cfg
 
     chk :: FilePath -> FilePath -> Maybe (Compiler,Installation)
     chk sr fp = do
-        cp  <- either (const Nothing) Just $ parseText $ T.pack fp
-        cv  <- compilerVersion cp
-        return $ (,) cp
+        cv  <- either (const Nothing) Just $ parseText cv_t
+        return $ (,) (Compiler $ Just cv)
           Installation
             { _iln_compiler   = cv
             , _iln_manager    = stack
-            , _iln_dir        = stackInstallationDir' cfg cv sr
+            , _iln_dir        = sr </> fp
             }
+      where
+        cv_t :: Text
+        cv_t = T.takeWhileEnd isvc $ T.pack fp
+          where
+            isvc c = isDigit c || c=='.'
 
     hdl :: SomeException -> IO (Map Compiler Installation)
     hdl _ = return mempty

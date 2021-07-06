@@ -20,6 +20,7 @@ import           HS.Cfg.Types
 import           HS.Managers.Types
 import           HS.Types.CompilerTool
 import           System.Directory
+import           System.FilePath
 import           System.Process.Typed
 import           Text.Enum.Text
 
@@ -53,7 +54,7 @@ ghcupDiscover cfg = handle hdl $ mk =<< listDirectory =<< ghcupStashDir cfg
           Installation
             { _iln_compiler = cv
             , _iln_manager  = ghcup
-            , _iln_dir      = ghcupInstallationDir' cfg cv sr
+            , _iln_dir      = sr </> fp
             }
 
     hdl :: SomeException -> IO (Map Compiler Installation)

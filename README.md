@@ -54,3 +54,14 @@ $ hs dump-ghc-wrappers ask-install
 With the path set up right your stack and cabal-install projects should play nicely together.
 
 Share and Enjoy!
+
+
+## Installation Instructions
+
+  1. Build and install `hs` on your path.
+
+  2. Build and install this
+     [patched version of `stack-2.8.0`](https://github.com/cdornan/stack-hs/pull/1)
+     and put it on the path.
+
+  3. Put [these wrapper scripts](wrappers) on your path.
