@@ -1,4 +1,4 @@
-# Towards a New Haskell Environment
+# Towards a Common Haskell Development Environment
 
 One of [the projects](https://haskell.foundation/projects/) we have been pursuing at the Haskell
 foundation is a unified installer. Hitherto things have been a little fragmented when it comes to
