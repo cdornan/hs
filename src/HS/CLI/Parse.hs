@@ -1,54 +1,61 @@
-{-# LANGUAGE DeriveAnyClass             #-}
-{-# LANGUAGE DeriveGeneric              #-}
-{-# LANGUAGE DerivingStrategies         #-}
-{-# LANGUAGE DerivingVia                #-}
-{-# LANGUAGE ExistentialQuantification  #-}
-{-# LANGUAGE FlexibleContexts           #-}
-{-# LANGUAGE FunctionalDependencies     #-}
-{-# LANGUAGE GeneralisedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase                 #-}
 {-# LANGUAGE MultiWayIf                 #-}
 {-# LANGUAGE OverloadedStrings          #-}
-{-# LANGUAGE PackageImports             #-}
-{-# LANGUAGE QuasiQuotes                #-}
-{-# LANGUAGE RankNTypes                 #-}
 {-# LANGUAGE RecordWildCards            #-}
 {-# LANGUAGE ScopedTypeVariables        #-}
-{-# LANGUAGE StandaloneDeriving         #-}
-{-# LANGUAGE TemplateHaskell            #-}
 {-# LANGUAGE TupleSections              #-}
 
 module HS.CLI.Parse where
 
 import           HS.CLI.OptParse
-import           HS.CLI.Types
+import           HS.CLI.ToolArgs
+import           HS.CLI.CLI
 import           Options.Applicative
-import           System.Environment
 
 
+-- | parse the command line
 parseCLI :: IO CLI
-parseCLI = getArgs >>= parseIO cli_p
+parseCLI = parseArgs cli_p
 
-cli_p :: Psr CLI
-cli_p = subparser $ mconcat
-    [ cmd "version" vrn $ pure CLI_version
-    , cmd "whereis" whr $      CLI_whereis   <$> imd_p <*> opt ghc_p
-    , cmd "run"     run $      CLI_run       <$> imd_p <*> opt ghc_p
-    , cmd "use"     use $      CLI_use       <$>           mny pvr_p
-    , cmd "list"    lst $      CLI_list      <$>           opt ghc_p
+cli_p :: ToolArgs -> Psr CLI
+cli_p tas = subparser $ mconcat
+    [ cmd "version"           vrn $ pure CLI_version
+    , cmd "whereis"           whr $      CLI_whereis       <$> opt inmd_p <*> cplr_p
+    , cmd "run"               run $      CLI_run           <$> opt inmd_p <*> tool_p <*> pure tas
+    , cmd "list"              lst $      CLI_list              <$>            opt cplr_p
+    , cmd "use"               use $      CLI_use               <$>            mny mngr_p
+    , cmd "use-install-mode"  uim $      CLI_use_install_mode  <$>            opt imda_p
+    , cmd "use-compiler"      ucp $      CLI_use_compiler      <$>            opt cpvn_p
+    , cmd "dump-ghc-wrappers" dgw $      CLI_dump_ghc_wrappers <$>            opt imda_p
     ]
   where
     vrn = "print out the version of this program"
-    whr = "identify the location of a (GHC) compiler"
-    run = "run the designated (GHC) compiler, installing needed and permitted, passing through the arguments"
-    use = "specify the priority of the sources of (GHC) toolchain installations"
-    lst = "list the visible (GHC) toolchains"
+    whr = "identify the location of a (Compiler) compiler"
+    run = "run the designated (Compiler) compiler, installing needed and permitted, passing through the arguments"
+    use = "specify the priority of the sources of (Compiler) toolchain installations"
+    lst = "list the visible (Compiler) toolchains"
+    uim = "set the default install mode"
+    ucp = "set the default compiler"
+    dgw = "dump the named directory GHC tool wrappers the indirect through hs"
 
-ghc_p :: Psr GHC
-ghc_p = arg_p "<ghc-x.y.z>" "compiler to use"
+-- flags/switches
 
-imd_p :: Psr InstallMode
-imd_p = arg_et_p "<install-mode>"
+inmd_p :: Psr InstallMode
+inmd_p = enum_switches_p
 
-pvr_p :: Psr Provider
-pvr_p = arg_p "<provider>" "provider of GHC installation (stack|ghcup|...)"
+-- arguments
+
+imda_p :: Psr InstallMode
+imda_p = arg_et_p "<installation-mode>"
+
+cplr_p :: Psr Compiler
+cplr_p = arg_p "<ghc-x.y.z>" "compiler to use"
+
+cpvn_p :: Psr CompilerVersion
+cpvn_p = arg_p "x.y.z" "version of the compiler to use"
+
+tool_p :: Psr Tool
+tool_p = arg_p "<tool-x.y.z>" "compiler to use"
+
+mngr_p :: Psr Manager
+mngr_p = arg_p "<manager>" "manager of Compiler installation (stack|ghcup|...)"

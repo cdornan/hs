@@ -20,8 +20,15 @@
 
 module HS.Cmd.List where
 
+import qualified Data.Map         as Map
+import           Data.Maybe
 import           HS.Types
 
 
-cmdList :: Maybe GHC -> IO ()
-cmdList = undefined
+-- | command driver to list all the installations
+cmdList :: Cfg -> Maybe Compiler -> IO ()
+cmdList Cfg{..} mb = sequence_
+    [ fmtLn $ build iln
+      | iln <- Map.elems _cfg_installations
+      , isNothing mb || mb == Just (Compiler $ Just $ _iln_compiler iln)
+      ]

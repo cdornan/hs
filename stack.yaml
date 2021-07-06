@@ -3,5 +3,8 @@ resolver: lts-18.0
 packages:
 - .
 
+ghc-options:
+  mcaeson: -Werror -j16
+
 extra-deps:
 - enum-text-0.5.2.1

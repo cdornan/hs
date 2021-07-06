@@ -6,9 +6,9 @@ cabal-version: 1.12
 
 name:           hs
 version:        0.1.0.0
-synopsis:       GHC bindist manager
+synopsis:       GHC-toolchain installer broker
 description:    A tool for keeping track of where GHC installations have been placed and reporting
-                that to the build managers.
+                that to the build managers (like @stack@ and @cabal-install@).
 homepage:       https://github.com/githubuser/hs#readme
 bug-reports:    https://github.com/githubuser/hs/issues
 author:         Chris Dornan <chris@chrisdornan.com>
@@ -29,30 +29,46 @@ library
   exposed-modules:
       HS
       HS.Cfg
+      HS.Cfg.CfgFile
       HS.Cfg.Load
+      HS.Cfg.Types
       HS.CLI
+      HS.CLI.CLI
       HS.CLI.OptParse
       HS.CLI.Parse
-      HS.CLI.Types
+      HS.CLI.ToolArgs
       HS.Cmd
+      HS.Cmd.Dump
       HS.Cmd.List
       HS.Cmd.Run
       HS.Cmd.Use
-      HS.Cmd.Version
       HS.Cmd.Whereis
-      HS.Discover
+      HS.Install
+      HS.Managers
+      HS.Managers.Ghcup
+      HS.Managers.Stack
+      HS.Managers.Types
       HS.Types
+      HS.Types.CompilerTool
+      HS.Types.InstallMode
+      HS.Types.Manager
   other-modules:
       Paths_hs
   hs-source-dirs:
       src
+  ghc-options: -Wall
   build-depends:
       base >=4.7 && <5
+    , containers
+    , data-default
+    , directory
     , enum-text
+    , filepath
     , fmt
     , optparse-applicative
     , possibly
     , text
+    , typed-process
   default-language: Haskell2010
 
 executable hs
@@ -61,13 +77,18 @@ executable hs
       Paths_hs
   hs-source-dirs:
       app
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , containers
+    , data-default
+    , directory
     , enum-text
+    , filepath
     , fmt
     , hs
     , optparse-applicative
     , possibly
     , text
+    , typed-process
   default-language: Haskell2010

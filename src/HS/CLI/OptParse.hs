@@ -6,12 +6,15 @@ module HS.CLI.OptParse where
 
 import           Control.Applicative
 import           Data.Char
+import           Data.Default
 import           Data.Maybe
 import           Data.Possibly
 import qualified Data.Text                   as T
 import           Fmt
+import           HS.CLI.ToolArgs
 import qualified Options.Applicative         as OP
 import           Options.Applicative.Builder
+import           System.Environment
 import           Text.Enum.Text
 
 
@@ -22,45 +25,66 @@ type Psr a = OP.Parser a
 opt :: Psr a -> Psr (Maybe a)
 opt = OP.optional
 
+-- | the OA Kleene closure operator
 mny :: Psr a -> Psr [a]
 mny = OP.many
 
 
 --------------------------------------------------------------------------------
--- the drivers
+-- parseArgs
+--------------------------------------------------------------------------------
+
+-- | main OA driver function
+parseArgs :: forall a . (ToolArgs->Psr a) -> IO a
+parseArgs psr = prs =<< getArgs
+  where
+    prs :: [String] -> IO a
+    prs as0 = parseIO (psr tas) as
+      where
+        tas = ToolArgs $ map T.pack $ tail' dd_tas
+        (as,dd_tas) = break (=="--") as0
+
+        tail' :: [b] -> [b]
+        tail' []    = []
+        tail' (_:t) = t
+
+
+--------------------------------------------------------------------------------
+-- the low-level drivers
 --------------------------------------------------------------------------------
 
 parserPrefs :: OP.ParserPrefs
 parserPrefs = OP.prefs showHelpOnEmpty
+
 -- | making an IO parser
 parseIO :: Psr a -> [String] -> IO a
 parseIO psr as = OP.handleParseResult $
-    OP.execParserPure parserPrefs (mkMcAesonParserInfo $ psr) as
+    OP.execParserPure parserPrefs (hsParserInfo $ psr) as
 
 -- | making a functional parser
 pureParse :: Psr a -> [String] -> Maybe a
 pureParse p =
-    OP.getParseResult . OP.execParserPure parserPrefs (mkMcAesonParserInfo p)
+    OP.getParseResult . OP.execParserPure parserPrefs (hsParserInfo p)
 
 -- | testing CLI parsers
 testCLI :: Show a => Psr a -> [String] -> IO ()
 testCLI psr ss = do
     x <- OP.handleParseResult $
-              OP.execParserPure parserPrefs (mkMcAesonParserInfo psr) ss
+              OP.execParserPure parserPrefs (hsParserInfo psr) ss
     print x
 
 
 --------------------------------------------------------------------------------
--- mkMcAesonParserInfo
+-- hsParserInfo
 --------------------------------------------------------------------------------
 
 -- | given a 'Psr' makes up a corresponding @ParserInfo@
-mkMcAesonParserInfo :: Psr a -> OP.ParserInfo a
-mkMcAesonParserInfo p =
+hsParserInfo :: Psr a -> OP.ParserInfo a
+hsParserInfo p =
     OP.info (OP.helper <*> p)
          $  fullDesc
-         <> progDesc "mcaeson, son of aeson"
-         <> header   "experiments in JSON parsing"
+         <> progDesc "GHC installation manager manager"
+         <> header   "towards a unified Haskell Development Environment"
          <> footer   "see --help for details of each sub-command"
 
 
@@ -125,6 +149,9 @@ opt_p ch nme hlp = option (eitherReader parseString)
   where
     var = map toUpper nme
     lng = map toLower nme
+
+enum_switches_with_def_p :: forall a . (Default a,EnumText a) => Psr a
+enum_switches_with_def_p = fmap (fromMaybe def) $ opt $ short_enum_switches_p $ const Nothing
 
 enum_switches_p :: forall a . EnumText a => Psr a
 enum_switches_p = short_enum_switches_p $ const Nothing
