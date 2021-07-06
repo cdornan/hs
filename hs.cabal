@@ -9,6 +9,7 @@ version:        0.1.0.0
 synopsis:       GHC-toolchain installer broker
 description:    A tool for keeping track of where GHC installations have been placed and reporting
                 that to the build managers (like @stack@ and @cabal-install@).
+category:       Development
 homepage:       https://github.com/githubuser/hs#readme
 bug-reports:    https://github.com/githubuser/hs/issues
 author:         Chris Dornan <chris@chrisdornan.com>

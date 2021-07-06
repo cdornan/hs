@@ -5,6 +5,7 @@ license:             BSD3
 author:              "Chris Dornan <chris@chrisdornan.com>"
 maintainer:          "Chris Dornan <chris@chrisdornan.com>"
 copyright:           "2021 Chris Dornan"
+category:            Development
 
 extra-source-files:
 - README.md
