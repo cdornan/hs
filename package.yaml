@@ -1,6 +1,6 @@
 name:                hs
-version:             0.1.0.0
-github:              "githubuser/hs"
+version:             0.1.0.1
+github:              "cdornan/hs"
 license:             BSD3
 author:              "Chris Dornan <chris@chrisdornan.com>"
 maintainer:          "Chris Dornan <chris@chrisdornan.com>"
